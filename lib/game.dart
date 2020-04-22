@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:jiffy/jiffy.dart';
@@ -8,12 +7,10 @@ part 'game.g.dart';
 enum Ordering{
 	name,relesead,added,created,rating
 }
-//TO Generate
-//flutter packages pub run build_runner build
-@JsonSerializable(createToJson: false)
+
 class Game{
 
-	static String source = 'https://api.rawg.io/api/games/';
+	static String source = 'https://api.rawg.io/api/games';
 	final int id;
 	final String slug;
 	final String name;
@@ -56,43 +53,82 @@ class Game{
 		this.metacriticUrl,
 	});
 
-	static Future<List<String>> search(String token,{
-		DateTime dateBegin,
-		DateTime dateEnd,
+	//TODO change Jiffy https://stackoverflow.com/questions/16126579/how-do-i-format-a-date-with-dart
+	static String _format(dynamic value){
+		if(value is String) return value;
+		if(value is List<String>){
+			String join ='';
+
+			for(int i = 1; i < value.length; i++)
+				join += ',' + value[i];
+			
+			return join;
+		}	
+		if(value is List<DateTime>){
+			
+			if(value.length == 1)
+				value.add(DateTime.now());
+
+			return
+				Jiffy(value[0]).format('yyyy-MM-dd') +
+				',' +
+				Jiffy(value[1]).format('yyyy-MM-dd');
+		}
+		return '';
+	}
+
+	static Future<List<String>> search({
+		String token,
+		List<DateTime> dates,
+		Ordering ordering,
+		bool reverseOrdering = false,
+		int page,
+		int pageSize,
+		String genre,
+		List<String> developers,
+		List<String> publishers,
 	}) async{
+		Map<String,dynamic> params = {
+			'search' : token,
+			'ordering' : (reverseOrdering? '-' + ordering.toString().split('.').last:ordering.toString().split('.').last),
+			'page' : page,
+			'page_size' : pageSize,
+			'genre' : genre,
+			'developers' : developers,
+			'publishers' : publishers,
+			'dates' : dates,
+		};
+
+ //https://api.rawg.io/api/games?saerch=doom&ordering=-Ordering.added&page=doom&dates=&dates=1989-11-09,2020-04-21&
 		
 		String path;
 
-		path = source;
+		path = source + '?';
 		
-		if(token = null)
-			path += '';
-		else
-			path += 'search=' + token + '&';
-		
-		if(dateBegin!= null)
-			path += 'dates=' +
-				Jiffy(dateBegin).format('yyyy-MM-dd') +
-				',' +
-				Jiffy(dateEnd).format('yyyy-MM-dd');
-
+		params.forEach(
+			(key,value){
+				if(value != null)
+					path += (key + '=' + _format(value) + '&');
+			}
+		);
+		print(path);
 		
 		List<String> gamesFound = [];
 		
-		var response = (await http.get(path, headers: {'Content-Type': 'application/json'})).bodyBytes;
+		var response = (await http.get(path.substring(0,path.length-1), headers: {'Content-Type': 'application/json'})).bodyBytes;
 		var responseMap = json.decode(utf8.decode(response))['results'];
 
 		for (var result in responseMap) 
       gamesFound.add(result['slug']);
     
-
     return gamesFound;
 	}
 
 	static Game fromJson(Map<String, dynamic> json) => _$GameFromJson(json);
 
 	static Future<Game> fromId(String slug,{bool populateScreenshoots = false, bool populateTrailers = false}) async{
-		Game game = fromJson(json.decode(utf8.decode((await http.get(source + slug, headers: {'Content-Type': 'application/json'})).bodyBytes)));
+		print(source + '/' + slug);
+		Game game = fromJson(json.decode(utf8.decode((await http.get(source + '/' + slug, headers: {'Content-Type': 'application/json'})).bodyBytes)));
 		
 		if(populateScreenshoots) game.populateScreenshots();
 		if(populateTrailers) game.populateTrailers();
@@ -131,11 +167,9 @@ class Game{
 
 }
 
-@JsonSerializable(createToJson: false)
 class TrailerData{
 	final String name;
 	final String preview;
-	@JsonKey(name: 'data', fromJson: func)
 	final String video;
 
 	static String func(Map<String, dynamic> data) => (data['max'] as String);

@@ -1,4 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
+// GENERATED CODE _ DO NOT MODIFY BY HAND
 
 part of 'game.dart';
 
@@ -11,7 +11,7 @@ Game _$GameFromJson(Map<String, dynamic> json) {
     id: json['id'] as int,
     slug: json['slug'] as String,
     name: json['name'] as String,
-    nameOriginal: json['nameOriginal'] as String,
+    nameOriginal: json['name_original'] as String,
     description: json['description'] as String,
     metacritic: json['metacritic'] as int,
     released: json['released'] == null
@@ -21,17 +21,17 @@ Game _$GameFromJson(Map<String, dynamic> json) {
     updated: json['updated'] == null
         ? null
         : DateTime.parse(json['updated'] as String),
-    backgroundImage: json['backgroundImage'] as String,
-    backgroundImageAdditional: json['backgroundImageAdditional'] as String,
+    backgroundImage: json['background_image'] as String,
+    backgroundImageAdditional: json['background_image_additional'] as String,
     website: json['website'] as String,
-    screenshotsCount: json['screenshotsCount'] as int,
-    moviesCount: json['moviesCount'] as int,
-    creatorsCount: json['creatorsCount'] as int,
-    achievementsCount: json['achievementsCount'] as int,
-    redditUrl: json['redditUrl'] as String,
+    screenshotsCount: json['screenshots_count'] as int,
+    moviesCount: json['movies_count'] as int,
+    creatorsCount: json['creators_count'] as int,
+    achievementsCount: json['achievements_count'] as int,
+    redditUrl: json['reddit_url'] as String,
     alternativeNames:
-        (json['alternativeNames'] as List)?.map((e) => e as String)?.toList(),
-    metacriticUrl: json['metacriticUrl'] as String,
+        (json['alternative_names'] as List)?.map((e) => e as String)?.toList(),
+    metacriticUrl: json['metacritic_url'] as String,
   );
 }
 
