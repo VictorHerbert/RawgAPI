@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:jiffy/jiffy.dart';
 
-part 'game.g.dart';
-
 enum Ordering{
 	name,relesead,added,created,rating
 }
@@ -98,8 +96,6 @@ class Game{
 			'publishers' : publishers,
 			'dates' : dates,
 		};
-
- //https://api.rawg.io/api/games?saerch=doom&ordering=-Ordering.added&page=doom&dates=&dates=1989-11-09,2020-04-21&
 		
 		String path;
 
@@ -124,10 +120,36 @@ class Game{
     return gamesFound;
 	}
 
-	static Game fromJson(Map<String, dynamic> json) => _$GameFromJson(json);
+	static Game fromJson(Map<String, dynamic> json){
+		return Game(
+			id: json['id'] as int,
+			slug: json['slug'] as String,
+			name: json['name'] as String,
+			nameOriginal: json['name_original'] as String,
+			description: json['description'] as String,
+			metacritic: json['metacritic'] as int,
+			released: json['released'] == null
+					? null
+					: DateTime.parse(json['released'] as String),
+			tba: json['tba'] as bool,
+			updated: json['updated'] == null
+					? null
+					: DateTime.parse(json['updated'] as String),
+			backgroundImage: json['background_image'] as String,
+			backgroundImageAdditional: json['background_image_additional'] as String,
+			website: json['website'] as String,
+			screenshotsCount: json['screenshots_count'] as int,
+			moviesCount: json['movies_count'] as int,
+			creatorsCount: json['creators_count'] as int,
+			achievementsCount: json['achievements_count'] as int,
+			redditUrl: json['reddit_url'] as String,
+			alternativeNames:
+					(json['alternative_names'] as List)?.map((e) => e as String)?.toList(),
+			metacriticUrl: json['metacritic_url'] as String,
+		);
+	}
 
 	static Future<Game> fromId(String slug,{bool populateScreenshoots = false, bool populateTrailers = false}) async{
-		print(source + '/' + slug);
 		Game game = fromJson(json.decode(utf8.decode((await http.get(source + '/' + slug, headers: {'Content-Type': 'application/json'})).bodyBytes)));
 		
 		if(populateScreenshoots) game.populateScreenshots();
@@ -175,5 +197,11 @@ class TrailerData{
 	static String func(Map<String, dynamic> data) => (data['max'] as String);
 
 	TrailerData(this.name,this.preview,this.video);
-	static TrailerData fromJson(Map<String, dynamic> json) => _$TrailerDataFromJson(json);
+	static TrailerData fromJson(Map<String, dynamic> json){
+		return TrailerData(
+			json['name'] as String,
+			json['preview'] as String,
+			TrailerData.func(json['data'] as Map<String, dynamic>),
+		);
+	}
 }

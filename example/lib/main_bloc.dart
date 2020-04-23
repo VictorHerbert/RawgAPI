@@ -8,6 +8,12 @@ class MainBloc extends BlocBase{
 	List<String> games = [];
 	Map<String,Widget> gameCache = {};
 	
+	bool _isSearching = false;
+	get isSearching => _isSearching;
+	set isSearching (bool value){
+		_isSearching = value;
+		notifyListeners();
+	}
 
 	get token => _token;
 	

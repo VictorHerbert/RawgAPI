@@ -2,7 +2,6 @@ import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:example/main_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:rawg_api/game.dart' as RAWG;
 
 void main() => runApp(MyApp());
@@ -38,24 +37,29 @@ class _MyHomePageState extends State<MyHomePage> {
     return Consumer<MainBloc>(builder: (BuildContext context, MainBloc bloc) {
       return Scaffold(
 				extendBody: true,
-        appBar: AppBar(
-					backgroundColor: Colors.purple,
-          title: TextField(
-						decoration: InputDecoration(
-							prefixIcon: Icon(Icons.search),
+        appBar: bloc.isSearching ? 
+					AppBar(
+						backgroundColor: Colors.purple,
+						title: TextField(
+							decoration: InputDecoration(
+								prefixIcon: Icon(Icons.search),
+							),
+							onSubmitted: (s) {
+								if (bloc.token != s) {
+									bloc.token = s;
+								}
+							},
 						),
-            onSubmitted: (s) {
-              if (bloc.token != s) {
-                bloc.token = s;
-              }
-            },
-          ),
-					//actions:[
-						//Icon(Icons.close)
-					//]
-        ),
+					) :
+					AppBar(
+						backgroundColor: Colors.purple,
+						title: Text('RawgApi'),
+						actions:[
+							Icon(Icons.menu)
+						]
+					),
         body: (bloc.token == '')
-            ? Text('Insert some token')
+            ? Center(child: Text('Insert some token'))
             : ListView.builder(
                 itemCount: bloc.games.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -63,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 }),
 				floatingActionButton: FloatingActionButton(
 					child: Icon(Icons.search),
-					onPressed: (){},
+					onPressed: (){bloc.isSearching = true;}
 				),
 				bottomNavigationBar: BottomAppBar(
 					//color: Colors.black,
